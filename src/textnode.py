@@ -222,7 +222,7 @@ def extract_title(markdown):
     raise Exception("No h1 header found")
 
 
-def generate_page(from_path, template_path, dest_path):
+def generate_page(from_path, template_path, dest_path, basepath="/"):
     print(f"Generating page from {from_path} to {dest_path} using {template_path}")
 
     with open(from_path, "r") as f:
@@ -235,6 +235,8 @@ def generate_page(from_path, template_path, dest_path):
     title = extract_title(markdown)
 
     page = template.replace("{{ Title }}", title).replace("{{ Content }}", html)
+    page = page.replace('href="/', f'href="{basepath}')
+    page = page.replace('src="/', f'src="{basepath}')
 
     dest_dir = os.path.dirname(dest_path)
     if dest_dir:
@@ -244,14 +246,14 @@ def generate_page(from_path, template_path, dest_path):
         f.write(page)
 
 
-def generate_pages_recursive(dir_path_content, template_path, dest_dir_path):
+def generate_pages_recursive(dir_path_content, template_path, dest_dir_path, basepath="/"):
     for item in os.listdir(dir_path_content):
         source_path = os.path.join(dir_path_content, item)
         if os.path.isfile(source_path) and item.endswith(".md"):
             dest_path = os.path.join(dest_dir_path, item.replace(".md", ".html"))
-            generate_page(source_path, template_path, dest_path)
+            generate_page(source_path, template_path, dest_path, basepath)
         elif os.path.isdir(source_path):
-            generate_pages_recursive(source_path, template_path, os.path.join(dest_dir_path, item))
+            generate_pages_recursive(source_path, template_path, os.path.join(dest_dir_path, item), basepath)
 
 
 # node = TextNode("This is text with a *code block* word", TextType.TEXT)
